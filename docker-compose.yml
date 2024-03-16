@@ -1,0 +1,38 @@
+version: '3'
+services:
+  prueba:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - default
+  mariadb:
+    image: mariadb
+    container_name: prueba_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: prueba
+      MYSQL_USER: prueba_web
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/initialize-db.sql:/docker-entrypoint-initdb.d/init.sql
+    command: [ "--init-file", "/docker-entrypoint-initdb.d/init.sql" ]
+    networks:
+      - default
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: prueba_phpmyadmin
+    links:
+      - mariadb
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mariadb
+    networks:
+      - default
